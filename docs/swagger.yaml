@@ -1,0 +1,230 @@
+basePath: /api
+definitions:
+  api.CreateMessageRequest:
+    properties:
+      content:
+        example: Hello, this is a test message
+        type: string
+      to:
+        example: "+905551111111"
+        type: string
+    required:
+    - content
+    - to
+    type: object
+  api.ErrorResponse:
+    properties:
+      code:
+        example: INVALID_ACTION
+        type: string
+      error:
+        example: use ?action=start or ?action=stop
+        type: string
+      message:
+        example: Detailed error message
+        type: string
+    type: object
+  api.StatusResponse:
+    properties:
+      status:
+        example: started
+        type: string
+    type: object
+  entity.Message:
+    description: Message entity with sending status
+    properties:
+      content:
+        description: Message content
+        example: Hello, this is a test message
+        type: string
+      createdAt:
+        description: Message creation timestamp
+        example: "2024-01-01T10:00:00Z"
+        type: string
+      id:
+        description: Message ID
+        example: 1
+        type: integer
+      sent:
+        description: Whether message has been sent
+        example: true
+        type: boolean
+      sentAt:
+        description: Timestamp when message was sent
+        example: "2024-01-01T12:00:00Z"
+        type: string
+      to:
+        description: Recipient phone number
+        example: "+905551111111"
+        type: string
+      updatedAt:
+        description: Message last update timestamp
+        example: "2024-01-01T10:00:00Z"
+        type: string
+      webhookMsgId:
+        description: Webhook message ID from response
+        example: webhook-123
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Automatic message sending system with webhook integration
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Insider Messaging API
+  version: "1.0"
+paths:
+  /auto:
+    get:
+      consumes:
+      - application/json
+      description: Control the automatic message sending scheduler
+      parameters:
+      - description: API Key for authentication
+        in: header
+        name: X-API-Key
+        required: true
+        type: string
+      - description: Action to perform
+        enum:
+        - start
+        - stop
+        in: query
+        name: action
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Start or stop automatic message sending
+      tags:
+      - scheduler
+    post:
+      consumes:
+      - application/json
+      description: Control the automatic message sending scheduler
+      parameters:
+      - description: API Key for authentication
+        in: header
+        name: X-API-Key
+        required: true
+        type: string
+      - description: Action to perform
+        enum:
+        - start
+        - stop
+        in: query
+        name: action
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Start or stop automatic message sending
+      tags:
+      - scheduler
+  /messages:
+    post:
+      consumes:
+      - application/json
+      description: Create a new message that will be sent automatically in the next
+        batch
+      parameters:
+      - description: API Key for authentication
+        in: header
+        name: X-API-Key
+        required: true
+        type: string
+      - description: Message data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.Message'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Create a new message
+      tags:
+      - messages
+  /sent:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all messages that have been successfully sent
+      parameters:
+      - description: API Key for authentication
+        in: header
+        name: X-API-Key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Message'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: List all sent messages
+      tags:
+      - messages
+schemes:
+- http
+- https
+swagger: "2.0"

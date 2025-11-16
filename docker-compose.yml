@@ -1,0 +1,60 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT:-8080}
+      DB_HOST: ${DB_HOST:-mariadb}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-root}
+      DB_NAME: ${DB_NAME:-insider}
+      WEBHOOK_URL: ${WEBHOOK_URL:-https://webhook.site/YOUR-ID}
+      WEBHOOK_AUTH_KEY: ${WEBHOOK_AUTH_KEY:-INS.example}
+      API_KEY: ${API_KEY:-your-secret-api-key-here}
+      REDIS_ADDR: ${REDIS_ADDR:-redis:6379}
+      WEBHOOK_TIMEOUT_SECONDS: ${WEBHOOK_TIMEOUT_SECONDS:-30}
+      MSG_CHAR_LIMIT: ${MSG_CHAR_LIMIT:-160}
+      SCHEDULE_SECONDS: ${SCHEDULE_SECONDS:-120}
+      MSG_PER_TICK: ${MSG_PER_TICK:-2}
+    ports:
+      - "8080:8080"
+
+  mariadb:
+    image: mariadb:11
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MARIADB_DATABASE: ${DB_NAME:-insider}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh --connect || exit 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  mariadbdata:
