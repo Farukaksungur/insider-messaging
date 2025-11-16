@@ -6,10 +6,10 @@ Bu proje, otomatik mesaj gönderme sistemi için geliştirilmiş bir Go uygulama
 
 Bu sistem şu şekilde çalışır:
 - Mesajlar REST API üzerinden oluşturulur ve veritabanına kaydedilir
-- Scheduler (zamanlayıcı) her 2 dakikada bir çalışır ve gönderilmemiş mesajları alır
-- Her batch'te 2 mesaj (ayarlanabilir) webhook URL'ine gönderilir
+- Scheduler her 2 dakikada bir çalışır ve gönderilmemiş mesajları alır
+- Her batch'te 2 mesaj webhook URL'ine gönderilir
 - Gönderilen mesajlar veritabanında işaretlenir ve tekrar gönderilmez
-- Mesaj ID'leri ve gönderme zamanları Redis'te cache'lenir (bonus özellik)
+- Mesaj ID'leri ve gönderme zamanları Redis'te cache'lenir
 
 ## 🚀 Hızlı Başlangıç
 
@@ -285,45 +285,6 @@ HGETALL message:1
 -- Sadece webhook_id'yi görüntüle
 HGET message:1 webhook_id
 ```
-
-## 🐛 Sorun Giderme
-
-### Uygulama başlamıyor
-
-```bash
-# Servislerin durumunu kontrol edin
-docker-compose ps
-
-# Logları kontrol edin
-docker-compose logs app
-```
-
-### Mesajlar gönderilmiyor
-
-1. Scheduler'ın başlatıldığından emin olun
-2. Webhook.site URL'inin doğru olduğunu kontrol edin
-3. Webhook.site'da response'un JSON formatında olduğunu kontrol edin
-4. Logları kontrol edin: `docker-compose logs -f app`
-
-### "failed to decode response" hatası
-
-Bu, webhook.site'dan dönen response'un JSON formatında olmadığını gösterir. Webhook.site'da:
-- Content type'ın `application/json` olduğundan emin olun
-- Response body'nin geçerli JSON olduğundan emin olun
-
-### Veritabanı bağlantı hatası
-
-```bash
-# MariaDB'nin çalıştığını kontrol edin
-docker-compose ps mariadb
-
-# MariaDB loglarını kontrol edin
-docker-compose logs mariadb
-
-# Servisleri yeniden başlatın
-docker-compose restart
-```
-
 ## 📁 Proje Yapısı
 
 ```
@@ -340,29 +301,10 @@ insider-messaging/
 └── Dockerfile            # Docker image tanımı
 ```
 
-## 🔒 Güvenlik
-
-- Tüm API endpoint'leri (health ve swagger hariç) `X-API-Key` header'ı gerektirir
-- Varsayılan API key: `your-secret-api-key-here` (production'da değiştirin!)
-- Webhook authentication için `x-ins-auth-key` header'ı kullanılır
-
 ## 📝 Notlar
 
 - Scheduler varsayılan olarak **otomatik başlamaz**. Manuel olarak `/api/auto?action=start` ile başlatmanız gerekir.
 - Her batch'te varsayılan olarak **2 mesaj** gönderilir
 - Mesajlar **FIFO** (First In First Out) sırasıyla gönderilir
 - Bir mesaj bir kez gönderildikten sonra **tekrar gönderilmez**
-- Redis cache opsiyoneldir ama önerilir
 
-## 🆘 Yardım
-
-Sorun yaşıyorsanız:
-
-1. Logları kontrol edin: `docker-compose logs -f app`
-2. Health check yapın: `curl http://localhost:8080/health`
-3. Swagger UI'yi kullanın: http://localhost:8080/swagger/
-4. Servislerin durumunu kontrol edin: `docker-compose ps`
-
-## 📞 İletişim
-
-Bu proje bir değerlendirme projesidir. Sorularınız için proje sahibiyle iletişime geçin.
