@@ -26,10 +26,6 @@ build-errors.log
 # IDE
 .idea/
 .vscode/
-.cursor/
-*.swp
-*.swo
-*~
 
 # OS
 .DS_Store
